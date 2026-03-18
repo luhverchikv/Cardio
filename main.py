@@ -1,14 +1,4 @@
 # main.py
-# pip install matplotlib
-# pip install motor
-# pip install loguru
-# pip install aiogram
-# pip install APScheduler
-# pip install xlsxwriter
-# pip install fluentogram
-# pip install environs
-# pip install cryptography
-
 
 import asyncio
 from aiogram import Bot, Dispatcher
@@ -28,11 +18,6 @@ from admin.owner import owner_router
 from admin.admin import admin_router
 from admin.specialist import specialist_router
 
-from tests.test_data import test_data_router
-
-from locales.loader import Translator
-from locales.middleware import TranslatorMD
-
 from utils.middlewares.logging_middleware import LoggingMiddleware
 from utils.middlewares.auth_middleware import UserAuthMiddleware
 from utils.middlewares.error_logging import ErrorLoggingMiddleware
@@ -51,8 +36,6 @@ async def main():
     
     dp.message.middleware(UserAuthMiddleware())
     dp.callback_query.middleware(UserAuthMiddleware())
-    dp.message.middleware(TranslatorMD())
-    dp.callback_query.middleware(TranslatorMD())
     dp.message.middleware(LoggingMiddleware())
     dp.callback_query.middleware(LoggingMiddleware())
     dp.update.middleware(ErrorLoggingMiddleware())
@@ -61,21 +44,14 @@ async def main():
     dp.include_router(demo_router)
     dp.include_router(language_router)
     dp.include_router(settings_router)
-    #dp.include_router(bp_router)
-    #dp.include_router(manual_bp_router)
     dp.include_router(voice_router)
     dp.include_router(report_router)
     dp.include_router(target_router)
     dp.include_routers(owner_router, admin_router, specialist_router)
     
-    dp.include_router(test_data_router)
-    
     setup_scheduler(bot)
     
-    await dp.start_polling(
-    bot,
-    translator=Translator()
-    )
+    await dp.start_polling(bot)
 
 
 if __name__ == "__main__":
