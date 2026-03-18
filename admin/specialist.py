@@ -26,7 +26,6 @@ from admin.base_handlers import (
     broadcast_to_entity_handler,
     view_chart_handler,
     close_callback_handler,
-    view_chart_handler,
 )
 from admin.entity_config import ENTITY_CONFIGS
 from mongo import users_collection
