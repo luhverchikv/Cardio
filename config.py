@@ -13,7 +13,6 @@ class DatabaseConfig:
 class TgBot:
     token: str
     owner_id: int
-    forum_topics: list
 
 
 @dataclass
@@ -45,21 +44,11 @@ mongo_url = (
 )
 
 
-topics_raw = env("FORUM_TOPICS", "")
-
-forum_topics = []
-if topics_raw:
-    for item in topics_raw.split(","):
-        key, name = item.split(":")
-        forum_topics.append({"key": key.strip(), "name": name.strip()})
-        
-
 # Создаем конфиг
 config = Config(
     bot=TgBot(
         token=env('BOT_TOKEN'),
-        owner_id=env.int('OWNER_ID'),
-        forum_topics=forum_topics
+        owner_id=env.int('OWNER_ID')
     ),
     db=DatabaseConfig(
         url=mongo_url,
