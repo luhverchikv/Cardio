@@ -63,7 +63,7 @@ async def process_admin_contact(message: Message, state: FSMContext):
     if data.get("entity_role") == "admin":  # ✅ Проверяем роль
         await process_entity_contact(message, state, CONFIG)
     else:
-        await message.answer(f"{data.get("entity_role")}\n❌ Ошибка: неверный тип сущности (admin). Начните заново.")
+        #await message.answer(f"{data.get("entity_role")}\n❌ Ошибка: неверный тип сущности (admin). Начните заново.")
         await state.clear()
 
 @owner_router.callback_query(F.data.startswith(f"confirm_{CONFIG.role}:"))
