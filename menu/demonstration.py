@@ -3,7 +3,6 @@ import asyncio
 from aiogram import Router, F, Bot
 from aiogram.types import Message, CallbackQuery, FSInputFile
 from menu.keyboard import menu_kb
-# ❌ Удалено: from locales.loader import LocalizedTranslator
 
 demo_router = Router()
 
