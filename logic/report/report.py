@@ -5,37 +5,31 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from logic.report.blood_pressure_chart import generate_blood_pressure_chart
 from logic.analytics.report_builder import build_bp_report
 from logic.analytics.formatter import format_bp_report
-from mongo import get_bp_entries_last_days #, get_user_topic_id
+from mongo import get_bp_entries_last_days
 import asyncio
 from menu.keyboard import menu_kb
-from locales.loader import LocalizedTranslator
 from aiogram.filters import Command
 
 
 report_router = Router()
 
 
-def report_details_keyboard(translator: LocalizedTranslator):
+def report_details_keyboard():
     kb = InlineKeyboardBuilder()
-    kb.button(
-        text=translator.get("report-details-button"),
-        callback_data="report_details"
-    )
+    kb.button(text="📊 Подробнее", callback_data="report_details")
     return kb.as_markup()
 
 
 @report_router.message(Command("report"))
 @report_router.message(F.text.startswith('📋'))
-async def start_report(message: Message, bot: Bot, translator: LocalizedTranslator):
+async def start_report(message: Message, bot: Bot):
     user_id = message.from_user.id
 
     # 1️⃣ Получаем данные
     entries, targets = await get_bp_entries_last_days(user_id)
 
     if not entries:
-        await message.answer(
-            translator.get("report-no-data")
-        )
+        await message.answer("❗️Данных за последние 30 дней не найдено. Добавьте хотя бы одно измерение артериального давления.")
         return
 
     # 2️⃣ Строим аналитику
@@ -58,17 +52,13 @@ async def start_report(message: Message, bot: Bot, translator: LocalizedTranslat
             filename="blood_pressure_chart.png"
         )
         chat_id = message.chat.id
-        #topic_id = await get_user_topic_id(user_id, "report")
+
         await bot.send_photo(
             photo=photo,
             chat_id=chat_id,
-            #message_thread_id=topic_id,
-            caption=translator.get("report-chart-caption"),
-            #reply_markup=menu_kb(translator)
+            caption="📈 График артериального давления за последние 30 дней"
+            #reply_markup=menu_kb()
         )
     else:
-        await message.answer(
-            translator.get("report-no-data")
-        )
-
+        await message.answer("❗️Данных за последние 30 дней не найдено. Добавьте хотя бы одно измерение артериального давления.")
     await message.delete()
