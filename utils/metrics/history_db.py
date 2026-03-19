@@ -1,4 +1,4 @@
-# utils/analytics/history_db.py
+# utils/metrics/history_db.py
 
 import sqlite3
 import asyncio
@@ -8,7 +8,7 @@ from loguru import logger
 from typing import Dict, List, Optional
 
 # Путь к базе данных
-DB_PATH = Path("utils/analytics/history_db.db")
+DB_PATH = Path("utils/metrics/history_db.db")
 
 
 def init_db():
