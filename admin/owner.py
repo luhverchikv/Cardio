@@ -6,7 +6,7 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from utils.reminders.reminders_run import send_monthly_charts_to_specialists
 from utils.filters.role_filter import RoleFilter
-from utils.analytics.daily_report import send_daily_report
+from utils.metrics.daily_report import send_daily_report
 from admin.base_handlers import (
     BaseEntityStates,
     BroadcastStates,
