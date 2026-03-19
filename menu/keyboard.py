@@ -1,15 +1,13 @@
 # menu/keyboard.py
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from locales.loader import LocalizedTranslator
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
 
 
-def start_kb(translator: LocalizedTranslator) -> ReplyKeyboardMarkup:
+def start_kb() -> ReplyKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text=translator.get("start-demo"),
+                    text=Знакомство с ботом",
                     callback_data="start_demo"
                 )
             ],
@@ -18,29 +16,28 @@ def start_kb(translator: LocalizedTranslator) -> ReplyKeyboardMarkup:
     )
 
 
-def menu_kb(translator: LocalizedTranslator) -> ReplyKeyboardMarkup:
+def menu_kb() -> ReplyKeyboardMarkup:
     return ReplyKeyboardMarkup(
         keyboard=[
-            #[KeyboardButton(text=translator.get("start-button-bp"))],
-            [KeyboardButton(text=translator.get("start-button-settings"))],
-            [KeyboardButton(text=translator.get("start-button-report"), style='primary')],
+            [KeyboardButton(text=⚙️ Настройки")],
+            [KeyboardButton(text=📋 Отчет", style='primary')],
         ],
         resize_keyboard=True
     )
     
     
-def delete_data_keyboard(translator: LocalizedTranslator):
+def delete_data_keyboard():
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text=translator.get("delete-confirm"),
+                    text="✅ Да, удалить мои данные",
                     callback_data="delete_my_data_confirm"
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text=translator.get("delete-cancel"),
+                    text="❌ Отмена",
                     callback_data="delete_my_data_cancel"
                 )
             ]
