@@ -9,7 +9,7 @@ from logic.bp_limits import check_bp_interval
 from loguru import logger
 from datetime import datetime
 from menu.keyboard import menu_kb
-from locales.loader import LocalizedTranslator
+
 
 from .converter import ogg_to_wav
 from .recognizer import recognize_text_from_wav
@@ -123,7 +123,7 @@ async def process_voice(message: Message):
     
     
 @voice_router.callback_query(F.data.startswith("bp|"))
-async def handle_bp_callback(callback: CallbackQuery, bot: Bot, translator:LocalizedTranslator):
+async def handle_bp_callback(callback: CallbackQuery, bot: Bot):
     user_id = callback.from_user.id
     chat_id = callback.message.chat.id
     
@@ -188,14 +188,12 @@ async def handle_bp_callback(callback: CallbackQuery, bot: Bot, translator:Local
         if arrhythmic:
             text += "\n⚠️ Отмечена аритмия"
         
-        #topic_id = await get_user_topic_id(user_id, "bp")
         try:
             await bot.send_message(
                 chat_id=chat_id,
-                #message_thread_id=topic_id,
                 text=text,
                 parse_mode="HTML",
-                reply_markup=menu_kb(translator)
+                reply_markup=menu_kb()
             )
             
         except TelegramBadRequest as e:
