@@ -7,7 +7,7 @@ def start_kb() -> ReplyKeyboardMarkup:
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text=Знакомство с ботом",
+                    text="Знакомство с ботом",
                     callback_data="start_demo"
                 )
             ],
@@ -19,8 +19,8 @@ def start_kb() -> ReplyKeyboardMarkup:
 def menu_kb() -> ReplyKeyboardMarkup:
     return ReplyKeyboardMarkup(
         keyboard=[
-            [KeyboardButton(text=⚙️ Настройки")],
-            [KeyboardButton(text=📋 Отчет", style='primary')],
+            [KeyboardButton(text="⚙️ Настройки")],
+            [KeyboardButton(text="📋 Отчет", style='primary')],
         ],
         resize_keyboard=True
     )
