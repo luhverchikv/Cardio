@@ -3,7 +3,6 @@ from aiogram import Router, F
 from aiogram.types import CallbackQuery, Message, InlineKeyboardButton, InlineKeyboardMarkup
 from mongo import get_reminders_status, set_reminders_status
 from aiogram.filters import Command
-# ❌ Удалено: from locales.loader import LocalizedTranslator
 
 settings_router = Router()
 
