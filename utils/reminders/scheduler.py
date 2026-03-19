@@ -2,8 +2,8 @@
 import zoneinfo
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
-from utils.analytics.history_db import calculate_weekly_aggregates, calculate_monthly_aggregates
-from utils.analytics.daily_report import send_daily_report
+from utils.metrics.history_db import calculate_weekly_aggregates, calculate_monthly_aggregates
+from utils.metrics.daily_report import send_daily_report
 from utils.reminders.reminders_run import send_admin_stats, send_monthly_charts_to_specialists
 from utils.reminders.bp_reminders import run_bp_reminders
 from config import config
