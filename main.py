@@ -11,7 +11,7 @@ from voice_engine.handler import voice_router
 
 from menu.start_menu import menu_router
 from menu.demonstration import demo_router
-from utils.language_menu import language_router
+
 from utils.settings import settings_router
 from utils.bp_target import target_router
 from admin.owner import owner_router
@@ -42,7 +42,6 @@ async def main():
 
     dp.include_router(menu_router)
     dp.include_router(demo_router)
-    dp.include_router(language_router)
     dp.include_router(settings_router)
     dp.include_router(voice_router)
     dp.include_router(report_router)
