@@ -24,18 +24,7 @@ def _get_utc_now() -> datetime:
     return datetime.now(timezone.utc)
 
 
-async def topic_exists(user_id: int, topic_key: str) -> bool:
-    """Проверяет существование топика у пользователя"""
-    user = await users_collection.find_one(
-        {"user_id": user_id},
-        {"topics": 1, "_id": 0}
-    )
-    if not user:
-        return False
-    return topic_key in user.get("topics", {})
-
-
-async def get_or_create_user(user_id: int, language: str = "ru") -> bool:
+async def get_or_create_user(user_id: int) -> bool:
     """
     Создает пользователя, если он не существует.
     Возвращает True, если пользователь был создан, False если уже существовал.
@@ -45,7 +34,7 @@ async def get_or_create_user(user_id: int, language: str = "ru") -> bool:
         "user_id": user_id,
         "registered_at": _get_utc_now(),
         "reminders": REMINDER_STATUS_OFF,
-        "language": language,
+
         "roles": ["user"],
         "bp_targets": {
             "systolic": 130,
@@ -86,18 +75,6 @@ async def add_blood_pressure_entry(
         {"$push": {"blood_pressure_entries": entry}}
     )
     return result.modified_count == 1
-
-
-async def get_user_language(user_id: int) -> str:
-    user = await users_collection.find_one({"user_id": user_id}, {"language": 1, "_id": 0})
-    return user.get("language", "ru") if user else "ru"
-
-
-async def set_user_language(user_id: int, lang: str):
-    await users_collection.update_one(
-        {"user_id": user_id},
-        {"$set": {"language": lang}}
-    )
 
 
 async def delete_user_data(user_id: int) -> bool:
