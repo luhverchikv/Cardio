@@ -15,6 +15,7 @@ from unittest.mock import patch, MagicMock
 class TestEncryptText:
     """Тесты функции encrypt_text"""
     
+    # Стало (правильно):
     def test_encrypts_string(self, mock_env_vars):
         """Шифрование строки возвращает зашифрованный текст"""
         from utils.encryption import encrypt_text
@@ -26,8 +27,10 @@ class TestEncryptText:
         assert isinstance(encrypted, str)
         # Зашифрованный текст отличается от оригинала
         assert encrypted != original
-        # Fernet создаёт токены определённого формата (содержат '.')
-        assert "." in encrypted
+        # Fernet токены — это URL-safe base64: содержат A-Za-z0-9-_ и заканчиваются на ==
+        assert encrypted.startswith("gAAAAA")  # Все токены Fernet начинаются с этого префикса
+        assert len(encrypted) > 50  # Токен имеет минимальную длину
+
     
     def test_encrypt_empty_string(self, mock_env_vars):
         """Шифрование пустой строки"""
