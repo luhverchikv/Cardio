@@ -1,11 +1,10 @@
 # tests/test_config.py
 import pytest
-from unittest.mock import patch
 
 
 def test_config_loads_with_valid_env(mock_env_vars):
     """Тест загрузки конфигурации с валидными переменными окружения"""
-    # Импортируем после моков, чтобы config.py прочитал мокированные env
+    # Импортируем ПОСЛЕ mock_env_vars, который очистил кэш модулей
     from config import config
     
     assert config.bot.token == "123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
@@ -17,22 +16,17 @@ def test_config_loads_with_valid_env(mock_env_vars):
 
 def test_config_missing_env_var(monkeypatch):
     """Тест поведения при отсутствии обязательной переменной окружения"""
-    # Очищаем окружение для чистого теста
+    # Очищаем окружение
     for key in ["BOT_TOKEN", "OWNER_ID", "MONGO_USER", "MONGO_PASS", "MONGO_DB", "FERNET_KEY"]:
         monkeypatch.delenv(key, raising=False)
     
-    # Пересоздаём модуль config для теста
+    # Очищаем кэш модулей
     import sys
-    if 'config' in sys.modules:
-        del sys.modules['config']
+    for mod in list(sys.modules.keys()):
+        if mod in ('config', 'environs'):
+            del sys.modules[mod]
     
-    # environs выбрасывает environs.EnvValidationError
-    try:
-        from environs import EnvValidationError
-        expected_exception = (EnvValidationError, Exception)
-    except ImportError:
-        expected_exception = Exception
-    
-    with pytest.raises(expected_exception):
+    # environs выбрасывает EnvValidationError
+    with pytest.raises(Exception):  # Ловим любой вариант ошибки
         from config import config  # noqa: F841
 
