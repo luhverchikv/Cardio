@@ -84,7 +84,7 @@ def create_mock_message(mock_aiogram_bot):
 @pytest.fixture
 def create_mock_callback():
     """Фабрика моков callback-запросов"""
-    def _factory( str = "", user_id: int = 123456):
+    def _factory(data: str = "", user_id: int = 123456):
         callback = MagicMock()
         callback.data = data
         callback.from_user.id = user_id
