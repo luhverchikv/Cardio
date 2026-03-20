@@ -21,10 +21,18 @@ def test_config_missing_env_var(monkeypatch):
     for key in ["BOT_TOKEN", "OWNER_ID", "MONGO_USER", "MONGO_PASS", "MONGO_DB", "FERNET_KEY"]:
         monkeypatch.delenv(key, raising=False)
     
-    with pytest.raises(Exception):  # environs выбросит ошибку
-        # Пересоздаём модуль config для теста
-        import sys
-        if 'config' in sys.modules:
-            del sys.modules['config']
+    # Пересоздаём модуль config для теста
+    import sys
+    if 'config' in sys.modules:
+        del sys.modules['config']
+    
+    # environs выбрасывает environs.EnvValidationError
+    try:
+        from environs import EnvValidationError
+        expected_exception = (EnvValidationError, Exception)
+    except ImportError:
+        expected_exception = Exception
+    
+    with pytest.raises(expected_exception):
         from config import config  # noqa: F841
 
