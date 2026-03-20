@@ -47,3 +47,20 @@ def mock_env_vars(mock_fernet_key, monkeypatch):
         if mod in modules_to_clear or mod.startswith('utils.'):
             del sys.modules[mod]
 
+
+@pytest.fixture
+def mock_encryption_module(mock_fernet_key, monkeypatch):
+    """
+    Мокируем модуль encryption с тестовым ключом.
+    Полезно для тестов, которые импортируют другие модули,
+    использующие encryption.
+    """
+    monkeypatch.setenv("FERNET_KEY", mock_fernet_key)
+    
+    # Очищаем кэш модулей
+    import sys
+    for mod in list(sys.modules.keys()):
+        if 'encryption' in mod or mod.startswith('utils.'):
+            del sys.modules[mod]
+
+
