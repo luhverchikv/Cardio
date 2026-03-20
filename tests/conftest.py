@@ -21,22 +21,5 @@ def mock_fernet_key():
 
 @pytest.fixture
 def mock_env_vars(mock_fernet_key, monkeypatch):
-    """
-    Мокируем переменные окружения и очищаем кэш модулей.
-    Важно: вызывается автоматически в тестах, которые его используют.
-    """
-    # Мокаем env vars
-    monkeypatch.setenv("BOT_TOKEN", "123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11")
-    monkeypatch.setenv("OWNER_ID", "999999999")
-    monkeypatch.setenv("MONGO_USER", "testuser")
-    monkeypatch.setenv("MONGO_PASS", "testpass")
-    monkeypatch.setenv("MONGO_HOST", "localhost")
-    monkeypatch.setenv("MONGO_PORT", "27017")
-    monkeypatch.setenv("MONGO_DB", "test_cardio")
-    monkeypatch.setenv("FERNET_KEY", mock_fernet_key)
-    
-    # Очищаем кэш модулей, чтобы config/mongo перечитали env vars
-    for mod in list(sys.modules.keys()):
-        if mod in ('config', 'mongo', 'utils.encryption') or mod.startswith('utils.'):
-            del sys.modules[mod]
-
+    """Мокируем env vars и очищаем кэш модулей"""
+    monkeypatch.setenv("BOT_TOKEN", "123456:ABC-DEF1234ghIkl-zyx57W2v1u123
