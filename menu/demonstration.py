@@ -11,7 +11,7 @@ async def show_demo_sequence(call: CallbackQuery, bot: Bot):
     user_id = call.from_user.id
     chat_id = call.message.chat.id
 
-    photo1 = FSInputFile("menu/IMG_0116.jpeg")
+    photo1 = FSInputFile("menu/IMG_0514.jpeg")
     await bot.send_photo(
         photo=photo1,
         chat_id=chat_id,
