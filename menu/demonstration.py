@@ -19,7 +19,7 @@ async def show_demo_sequence(call: CallbackQuery, bot: Bot):
     )
     await asyncio.sleep(5)
 
-    photo2 = FSInputFile("menu/IMG_0363.jpeg")
+    photo2 = FSInputFile("menu/IMG_0515.jpeg")
     await bot.send_photo(
         photo=photo2,
         chat_id=chat_id,
@@ -27,7 +27,7 @@ async def show_demo_sequence(call: CallbackQuery, bot: Bot):
     )
     await asyncio.sleep(5)
 
-    video = FSInputFile("menu/5972954607000541907.mov")
+    video = FSInputFile("menu/7027506647285554585.mp4")
     await bot.send_video(
         video=video,
         chat_id=chat_id,
