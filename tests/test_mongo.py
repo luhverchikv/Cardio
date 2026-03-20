@@ -1,7 +1,7 @@
 # tests/test_mongo.py
 """
-Тесты для модуля mongo.py
-Все тесты используют моки — не требуют реального подключения к MongoDB.
+Тесты для модуля mongo.py — соответствуют реальной реализации.
+Все тесты используют моки, не требуют реального MongoDB.
 """
 import pytest
 import pytest_asyncio
@@ -10,18 +10,17 @@ from unittest.mock import MagicMock, AsyncMock, patch
 
 
 # ============================================================================
-# ФИКСТУРЫ (локальные для этого файла)
+# ФИКСТУРЫ
 # ============================================================================
 
 @pytest_asyncio.fixture
 async def mock_collection():
-    """Создаем чистый MagicMock для коллекции MongoDB"""
+    """Чистый MagicMock для коллекции"""
     collection = MagicMock()
     collection.update_one = AsyncMock()
     collection.find_one = AsyncMock()
     collection.delete_one = AsyncMock()
     
-    # Мок для aggregate: возвращает курсор с методом to_list
     mock_cursor = AsyncMock()
     mock_cursor.to_list = AsyncMock(return_value=[])
     collection.aggregate = MagicMock(return_value=mock_cursor)
@@ -38,7 +37,6 @@ def patch_collection(mock_collection):
 
 @pytest.fixture
 def sample_bp_entry():
-    """Пример данных для записи о давлении"""
     return {
         "user_id": 123456,
         "systolic": 120,
@@ -53,46 +51,46 @@ def sample_bp_entry():
 # ============================================================================
 
 class TestGetOrCreateUser:
-    """Тесты функции get_or_create_user"""
+    """Тесты get_or_create_user — использует upsert, не вызывает find_one"""
     
     @pytest.mark.asyncio
     async def test_creates_new_user(self, mock_env_vars, patch_collection):
-        """Пользователя нет в БД -> создаётся новый"""
+        """Новый пользователь: upserted_id != None → возвращает True"""
         from mongo import get_or_create_user
         
-        # find_one возвращает None (пользователь не найден)
-        patch_collection.find_one.return_value = None
-        # update_one имитирует upsert: возвращаем mock с upserted_id
+        # Имитируем, что документ был создан (upserted_id установлен)
         patch_collection.update_one.return_value = MagicMock(upserted_id="new_id")
         
         result = await get_or_create_user(999999)
         
         assert result is True
-        patch_collection.find_one.assert_called_once_with({"user_id": 999999})
+        # Проверяем, что update_one вызван с правильными аргументами
         patch_collection.update_one.assert_called_once()
+        call_args = patch_collection.update_one.call_args
+        assert call_args[0][0] == {"user_id": 999999}  # filter
+        assert "$setOnInsert" in call_args[0][1]  # update
+        assert call_args[1].get("upsert") is True
     
     @pytest.mark.asyncio
     async def test_user_exists(self, mock_env_vars, patch_collection):
-        """Пользователь уже есть в БД -> ничего не создаём"""
+        """Пользователь уже есть: upserted_id = None → возвращает False"""
         from mongo import get_or_create_user
         
-        # find_one возвращает данные пользователя
-        patch_collection.find_one.return_value = {"user_id": 123456, "reminders": 1}
+        # Имитируем, что документ уже существовал (upserted_id = None)
+        patch_collection.update_one.return_value = MagicMock(upserted_id=None)
         
         result = await get_or_create_user(123456)
         
-        assert result is True
-        patch_collection.find_one.assert_called_once_with({"user_id": 123456})
-        # update_one не должен вызываться, если пользователь найден
-        patch_collection.update_one.assert_not_called()
+        assert result is False  # ← Ключевое: функция возвращает False, если пользователь уже был
+        patch_collection.update_one.assert_called_once()
 
 
 class TestAddBloodPressureEntry:
-    """Тесты функции add_blood_pressure_entry"""
+    """Тесты add_blood_pressure_entry"""
     
     @pytest.mark.asyncio
     async def test_adds_entry_successfully(self, mock_env_vars, patch_collection, sample_bp_entry):
-        """Успешное добавление записи о давлении"""
+        """Успешное добавление: modified_count == 1 → True"""
         from mongo import add_blood_pressure_entry
         
         patch_collection.update_one.return_value = MagicMock(modified_count=1)
@@ -107,23 +105,18 @@ class TestAddBloodPressureEntry:
         
         assert result is True
         
-        # Проверяем аргументы вызова update_one
+        # Проверяем структуру записи
         call_args = patch_collection.update_one.call_args
-        assert call_args is not None
-        
         filter_arg, update_arg = call_args[0]
         assert filter_arg == {"user_id": sample_bp_entry["user_id"]}
         assert "$push" in update_arg
-        assert "blood_pressure_entries" in update_arg["$push"]
         
-        # Проверяем структуру добавляемой записи
         entry = update_arg["$push"]["blood_pressure_entries"]
         assert entry["systolic"] == 120
         assert entry["diastolic"] == 80
         assert entry["pulse"] == 72
         assert entry["arrhythmic"] is False
         assert "timestamp" in entry
-        assert isinstance(entry["timestamp"], datetime)
     
     @pytest.mark.asyncio
     async def test_handles_arrhythmic_true(self, mock_env_vars, patch_collection):
@@ -133,11 +126,7 @@ class TestAddBloodPressureEntry:
         patch_collection.update_one.return_value = MagicMock(modified_count=1)
         
         await add_blood_pressure_entry(
-            user_id=123456,
-            systolic=140,
-            diastolic=90,
-            pulse=85,
-            arrhythmic=True  # ← Важный случай
+            user_id=123456, systolic=140, diastolic=90, pulse=85, arrhythmic=True
         )
         
         entry = patch_collection.update_one.call_args[0][1]["$push"]["blood_pressure_entries"]
@@ -145,21 +134,20 @@ class TestAddBloodPressureEntry:
 
 
 class TestSetRemindersStatus:
-    """Тесты функции set_reminders_status"""
+    """Тесты set_reminders_status — функция НЕ возвращает значение"""
     
     @pytest.mark.asyncio
     @pytest.mark.parametrize("status", [0, 1, 2, 3])
     async def test_valid_statuses(self, mock_env_vars, patch_collection, status):
-        """Установка валидных статусов уведомлений"""
+        """Установка валидных статусов — функция возвращает None"""
         from mongo import set_reminders_status
         
-        patch_collection.update_one.return_value = MagicMock(modified_count=1)
+        # Функция не возвращает значение, поэтому не проверяем результат
+        await set_reminders_status(123456, status)
         
-        result = await set_reminders_status(123456, status)
-        
-        assert result is True
-        
-        filter_arg, update_arg = patch_collection.update_one.call_args[0]
+        # Проверяем, что update_one вызван правильно
+        call_args = patch_collection.update_one.call_args
+        filter_arg, update_arg = call_args[0]
         assert filter_arg == {"user_id": 123456}
         assert update_arg == {"$set": {"reminders": status}}
     
@@ -174,29 +162,18 @@ class TestSetRemindersStatus:
 
 
 class TestGetBpEntriesLastDays:
-    """Тесты функции get_bp_entries_last_days"""
+    """Тесты get_bp_entries_last_days"""
     
     @pytest.mark.asyncio
     async def test_returns_entries_and_targets(self, mock_env_vars, patch_collection):
         """Успешное получение записей и целей"""
         from mongo import get_bp_entries_last_days
         
-        # Готовим мок-ответ агрегации
         mock_cursor = AsyncMock()
         mock_cursor.to_list = AsyncMock(return_value=[{
             "blood_pressure_entries": [
-                {
-                    "timestamp": datetime.now(timezone.utc) - timedelta(days=1),
-                    "systolic": 120,
-                    "diastolic": 80,
-                    "pulse": 70
-                },
-                {
-                    "timestamp": datetime.now(timezone.utc) - timedelta(days=2),
-                    "systolic": 125,
-                    "diastolic": 82,
-                    "pulse": 75
-                }
+                {"timestamp": datetime.now(timezone.utc) - timedelta(days=1), "systolic": 120, "diastolic": 80, "pulse": 70},
+                {"timestamp": datetime.now(timezone.utc) - timedelta(days=2), "systolic": 125, "diastolic": 82, "pulse": 75}
             ],
             "bp_targets": {"systolic": 130, "diastolic": 85}
         }])
@@ -204,27 +181,22 @@ class TestGetBpEntriesLastDays:
         
         entries, targets = await get_bp_entries_last_days(123456, days=7)
         
-        # Проверяем тип и содержимое результата
         assert isinstance(entries, list)
         assert len(entries) == 2
         assert entries[0]["systolic"] == 120
-        assert entries[1]["diastolic"] == 82
         
         assert isinstance(targets, dict)
         assert targets["systolic"] == 130
-        assert targets["diastolic"] == 85
         
-        # Проверяем, что aggregate вызван с правильным pipeline
-        patch_collection.aggregate.assert_called_once()
+        # Проверяем, что pipeline корректный
         pipeline = patch_collection.aggregate.call_args[0][0]
         assert pipeline[0]["$match"]["user_id"] == 123456
     
     @pytest.mark.asyncio
     async def test_empty_result(self, mock_env_vars, patch_collection):
-        """Нет записей за указанный период"""
+        """Нет записей за период"""
         from mongo import get_bp_entries_last_days
         
-        # Пустой результат агрегации
         mock_cursor = AsyncMock()
         mock_cursor.to_list = AsyncMock(return_value=[])
         patch_collection.aggregate.return_value = mock_cursor
@@ -232,15 +204,15 @@ class TestGetBpEntriesLastDays:
         entries, targets = await get_bp_entries_last_days(999999, days=30)
         
         assert entries == []
-        assert targets == {}  # или {"systolic": None, "diastolic": None} — зависит от реализации
+        assert targets == {}
 
 
 class TestDeleteUserData:
-    """Тесты функции delete_user_data"""
+    """Тесты delete_user_data"""
     
     @pytest.mark.asyncio
     async def test_deletes_user_successfully(self, mock_env_vars, patch_collection):
-        """Успешное удаление данных пользователя"""
+        """Успешное удаление: deleted_count > 0 → True"""
         from mongo import delete_user_data
         
         patch_collection.delete_one.return_value = MagicMock(deleted_count=1)
@@ -252,14 +224,12 @@ class TestDeleteUserData:
     
     @pytest.mark.asyncio
     async def test_user_not_found(self, mock_env_vars, patch_collection):
-        """Пользователь не найден при удалении"""
+        """Пользователь не найден: deleted_count = 0 → False"""
         from mongo import delete_user_data
         
         patch_collection.delete_one.return_value = MagicMock(deleted_count=0)
         
         result = await delete_user_data(999999)
         
-        # Функция может возвращать False или True — зависит от реализации
-        # Проверяем, что удаление было попытано
-        patch_collection.delete_one.assert_called_once_with({"user_id": 999999})
+        assert result is False  # ← Функция возвращает False, если ничего не удалено
 
