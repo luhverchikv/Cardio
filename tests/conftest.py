@@ -2,6 +2,7 @@
 import sys
 import pytest
 import pytest_asyncio
+from unittest.mock import MagicMock, AsyncMock, patch 
 from cryptography.fernet import Fernet
 
 pytest_plugins = ('pytest_asyncio',)
