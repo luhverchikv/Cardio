@@ -294,27 +294,47 @@ class TestConfigErrors:
         with pytest.raises((EnvValidationError, Exception)):
             from config import config  # noqa: F841
     
-    def test_missing_mongo_user_pass_ok(self, monkeypatch):
-        """Отсутствие MONGO_USER/MONGO_PASS НЕ вызывает ошибку (environs позволяет)"""
+    def test_missing_mongo_user_raises(self, monkeypatch):
+        """Отсутствие MONGO_USER вызывает ошибку"""
         monkeypatch.delenv("MONGO_USER", raising=False)
-        monkeypatch.delenv("MONGO_PASS", raising=False)
-        
+
         monkeypatch.setenv("BOT_TOKEN", "123456:ABC-DEF")
         monkeypatch.setenv("OWNER_ID", "999999999")
+        monkeypatch.setenv("MONGO_PASS", "test")
         monkeypatch.setenv("MONGO_HOST", "localhost")
         monkeypatch.setenv("MONGO_PORT", "27017")
         monkeypatch.setenv("MONGO_DB", "test_cardio")
         monkeypatch.setenv("FERNET_KEY", "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
-        
+
         for mod in list(sys.modules.keys()):
             if mod in ('config', 'environs'):
                 del sys.modules[mod]
-        
-        # environs НЕ требует эти поля — они могут быть пустыми
-        from config import config
-        
-        # URL будет с пустыми credentials, но конфиг загрузится
-        assert config.db.url is not None
+
+        from environs import EnvValidationError
+
+        with pytest.raises((EnvValidationError, Exception)):
+            from config import config  # noqa: F841
+
+    def test_missing_mongo_pass_raises(self, monkeypatch):
+        """Отсутствие MONGO_PASS вызывает ошибку"""
+        monkeypatch.delenv("MONGO_PASS", raising=False)
+
+        monkeypatch.setenv("BOT_TOKEN", "123456:ABC-DEF")
+        monkeypatch.setenv("OWNER_ID", "999999999")
+        monkeypatch.setenv("MONGO_USER", "test")
+        monkeypatch.setenv("MONGO_HOST", "localhost")
+        monkeypatch.setenv("MONGO_PORT", "27017")
+        monkeypatch.setenv("MONGO_DB", "test_cardio")
+        monkeypatch.setenv("FERNET_KEY", "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
+
+        for mod in list(sys.modules.keys()):
+            if mod in ('config', 'environs'):
+                del sys.modules[mod]
+
+        from environs import EnvValidationError
+
+        with pytest.raises((EnvValidationError, Exception)):
+            from config import config  # noqa: F841
     
     def test_missing_owner_id_raises(self, monkeypatch):
         """Отсутствие OWNER_ID вызывает ошибку"""
@@ -390,4 +410,3 @@ def test_owner_id_conversions(mock_fernet_key, monkeypatch, test_owner_id, expec
     
     assert config.bot.owner_id == expected_id
     assert isinstance(config.bot.owner_id, int)
-
