@@ -1,16 +1,21 @@
 # tests/conftest.py
+"""
+Общие фикстуры для тестов Cardio.
+Используются в: test_mongo.py, test_config.py, test_encryption.py
+"""
 import sys
 import pytest
 import pytest_asyncio
-from unittest.mock import MagicMock, AsyncMock, patch 
+from unittest.mock import MagicMock, AsyncMock, patch
 from cryptography.fernet import Fernet
 
+# Регистрация плагина pytest-asyncio
 pytest_plugins = ('pytest_asyncio',)
 
 
 @pytest.fixture(scope="session")
 def event_loop():
-    """Создание event loop для async тестов"""
+    """Создание event loop для async-тестов"""
     import asyncio
     loop = asyncio.get_event_loop_policy().new_event_loop()
     yield loop
@@ -26,10 +31,12 @@ def mock_fernet_key():
 @pytest.fixture
 def mock_env_vars(mock_fernet_key, monkeypatch):
     """
-    Мокируем переменные окружения и очищаем кэш модулей.
-    Важно: вызывается автоматически в тестах, которые его используют.
+    Мокирует переменные окружения и очищает кэш модулей.
+    
+    Используется в тестах, которые импортируют config/mongo/encryption.
+    Автоматически очищает sys.modules, чтобы модули перечитали новые env vars.
     """
-    # Мокаем env vars
+    # Мокаем переменные окружения
     monkeypatch.setenv("BOT_TOKEN", "123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11")
     monkeypatch.setenv("OWNER_ID", "999999999")
     monkeypatch.setenv("MONGO_USER", "testuser")
@@ -39,72 +46,9 @@ def mock_env_vars(mock_fernet_key, monkeypatch):
     monkeypatch.setenv("MONGO_DB", "test_cardio")
     monkeypatch.setenv("FERNET_KEY", mock_fernet_key)
     
-    # Очищаем кэш модулей, чтобы config/mongo перечитали env vars
-    modules_to_clear = [
-        'config', 'mongo', 'utils.encryption',
-        'utils', 'utils.helpers'  # добавьте другие подмодули utils при необходимости
-    ]
+    # Очищаем кэш модулей, чтобы они перечитали env vars
+    modules_to_clear = ['config', 'mongo', 'environs']
     for mod in list(sys.modules.keys()):
         if mod in modules_to_clear or mod.startswith('utils.'):
             del sys.modules[mod]
-
-
-@pytest.fixture
-def mock_encryption_module(mock_fernet_key, monkeypatch):
-    """
-    Мокируем модуль encryption с тестовым ключом.
-    Полезно для тестов, которые импортируют другие модули,
-    использующие encryption.
-    """
-    monkeypatch.setenv("FERNET_KEY", mock_fernet_key)
-    
-    # Очищаем кэш модулей
-    import sys
-    for mod in list(sys.modules.keys()):
-        if 'encryption' in mod or mod.startswith('utils.'):
-            del sys.modules[mod]
-
-
-@pytest.fixture
-def mock_aiogram_bot():
-    """Мок aiogram Bot для тестов хендлеров"""
-    bot = MagicMock()
-    bot.send_message = AsyncMock()
-    bot.edit_message_text = AsyncMock()
-    bot.delete_message = AsyncMock()
-    bot.copy_message = AsyncMock()
-    bot.answer_callback_query = AsyncMock()
-    return bot
-
-
-@pytest.fixture
-def create_mock_message(mock_aiogram_bot):
-    """Фабрика моков сообщений Telegram"""
-    def _factory(text: str = "", user_id: int = 123456, chat_id: int = 123456):
-        message = MagicMock()
-        message.text = text
-        message.from_user = MagicMock(id=user_id)
-        message.chat = MagicMock(id=chat_id)
-        message.answer = AsyncMock()
-        message.delete = AsyncMock()
-        message.bot = mock_aiogram_bot
-        message.reply = AsyncMock()
-        return message
-    return _factory
-
-
-@pytest.fixture
-def create_mock_callback():
-    """Фабрика моков callback-запросов"""
-    def _factory( str = "", user_id: int = 123456):
-        callback = MagicMock()
-        callback.data = data
-        callback.from_user = MagicMock(id=user_id)
-        callback.message = MagicMock()
-        callback.message.edit_text = AsyncMock()
-        callback.message.delete = AsyncMock()
-        callback.answer = AsyncMock()
-        return callback
-    return _factory
-
 
