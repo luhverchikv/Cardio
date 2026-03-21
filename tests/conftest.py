@@ -64,3 +64,47 @@ def mock_encryption_module(mock_fernet_key, monkeypatch):
             del sys.modules[mod]
 
 
+# tests/conftest.py - ДОБАВИТЬ В КОНЕЦ
+
+@pytest.fixture
+def mock_aiogram_bot():
+    """Мок aiogram Bot для тестов хендлеров"""
+    bot = MagicMock()
+    bot.send_message = AsyncMock()
+    bot.edit_message_text = AsyncMock()
+    bot.delete_message = AsyncMock()
+    bot.copy_message = AsyncMock()
+    return bot
+
+
+@pytest.fixture
+def create_mock_message(mock_aiogram_bot):
+    """Фабрика моков сообщений Telegram"""
+    def _factory(text: str = "", user_id: int = 123456, chat_id: int = 123456):
+        message = MagicMock(spec=Message)
+        message.text = text
+        message.from_user = MagicMock(id=user_id)
+        message.chat = MagicMock(id=chat_id)
+        message.answer = AsyncMock()
+        message.delete = AsyncMock()
+        message.bot = mock_aiogram_bot
+        message.reply = AsyncMock()
+        return message
+    return _factory
+
+
+@pytest.fixture
+def create_mock_callback():
+    """Фабрика моков callback-запросов"""
+    def _factory(data: str = "", user_id: int = 123456):
+        callback = MagicMock(spec=CallbackQuery)
+        callback.data = data
+        callback.from_user = MagicMock(id=user_id)
+        callback.message = MagicMock()
+        callback.message.edit_text = AsyncMock()
+        callback.message.delete = AsyncMock()
+        callback.answer = AsyncMock()
+        return callback
+    return _factory
+
+
