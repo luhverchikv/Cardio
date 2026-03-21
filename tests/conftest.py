@@ -65,8 +65,6 @@ def mock_encryption_module(mock_fernet_key, monkeypatch):
             del sys.modules[mod]
 
 
-# tests/conftest.py - ДОБАВИТЬ В КОНЕЦ
-
 @pytest.fixture
 def mock_aiogram_bot():
     """Мок aiogram Bot для тестов хендлеров"""
@@ -75,6 +73,7 @@ def mock_aiogram_bot():
     bot.edit_message_text = AsyncMock()
     bot.delete_message = AsyncMock()
     bot.copy_message = AsyncMock()
+    bot.answer_callback_query = AsyncMock()
     return bot
 
 
@@ -82,7 +81,7 @@ def mock_aiogram_bot():
 def create_mock_message(mock_aiogram_bot):
     """Фабрика моков сообщений Telegram"""
     def _factory(text: str = "", user_id: int = 123456, chat_id: int = 123456):
-        message = MagicMock(spec=Message)
+        message = MagicMock()
         message.text = text
         message.from_user = MagicMock(id=user_id)
         message.chat = MagicMock(id=chat_id)
@@ -97,8 +96,8 @@ def create_mock_message(mock_aiogram_bot):
 @pytest.fixture
 def create_mock_callback():
     """Фабрика моков callback-запросов"""
-    def _factory(data: str = "", user_id: int = 123456):
-        callback = MagicMock(spec=CallbackQuery)
+    def _factory( str = "", user_id: int = 123456):
+        callback = MagicMock()
         callback.data = data
         callback.from_user = MagicMock(id=user_id)
         callback.message = MagicMock()
