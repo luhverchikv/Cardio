@@ -29,7 +29,7 @@ class Config:
 
 # Инициализация Env
 env = Env()
-env.read_env()  # Читаем из .env файла в корне проекта
+#env.read_env()  # Читаем из .env файла в корне проекта
 
 # Формируем URL подключения
 mongo_user = env("MONGO_USER")
