@@ -1,6 +1,7 @@
 # config.py
 from dataclasses import dataclass
 from environs import Env
+import sys
 
 
 @dataclass
@@ -29,8 +30,10 @@ class Config:
 
 # Инициализация Env
 env = Env()
-#env.read_env()  # Читаем из .env файла в корне проекта
-
+# Не читаем .env файл при запуске тестов
+if not any("pytest" in arg for arg in sys.argv):
+    env.read_env()  # Читаем из .env файла только при normal запуске
+    
 # Формируем URL подключения
 mongo_user = env("MONGO_USER")
 mongo_pass = env("MONGO_PASS")
