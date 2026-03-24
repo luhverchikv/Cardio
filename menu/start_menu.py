@@ -13,7 +13,7 @@ menu_router = Router()
 async def command_start(message: Message, bot: Bot):
     await get_or_create_user(message.from_user.id)
     await message.answer(
-        "👋 Рад видеть Вас здесь. \n\nКонтроль давления — это не про строгие цифры. Это про спокойствие. Про уверенность. Про ещё один день рядом с теми, кто важен ❤️",
+        "👋 Рад видеть Вас здесь. \n\nКонтроль давления — это не про строгие цифры. \nЭто про спокойствие. \nПро уверенность. \nПро ещё один день рядом с теми, кто важен ❤️",
         reply_markup=menu_kb()
     )
     await message.answer(
