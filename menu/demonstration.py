@@ -32,7 +32,7 @@ async def show_demo_sequence(call: CallbackQuery, bot: Bot):
     await bot.send_video(
         video=video,
         chat_id=chat_id,
-        caption="Теперь посмотрите короткое видео-демонстрацию. Нажмите и удерживайте значок микрофона и произнесите фразу, как показано в примере."
+        caption="Теперь посмотрите короткое видео-демонстрацию. \n\nНажмите и удерживайте значок микрофона и произнесите фразу, как показано в примере."
     )
     await asyncio.sleep(1)
 
