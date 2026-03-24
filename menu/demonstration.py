@@ -10,7 +10,8 @@ demo_router = Router()
 async def show_demo_sequence(call: CallbackQuery, bot: Bot):
     user_id = call.from_user.id
     chat_id = call.message.chat.id
-
+    #await call.answer()
+    await call.message.delete()
     photo1 = FSInputFile("menu/IMG_0514.jpeg")
     await bot.send_photo(
         photo=photo1,
@@ -40,6 +41,5 @@ async def show_demo_sequence(call: CallbackQuery, bot: Bot):
         text="🎉 Теперь вы знаете, как пользоваться ботом. Вы можете: • добавить измерение • посмотреть отчёт • настроить цели Начнём?",
         reply_markup=menu_kb()
     )
-    await call.answer()
-    await call.message.delete()
+    
 
