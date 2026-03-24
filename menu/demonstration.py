@@ -38,7 +38,7 @@ async def show_demo_sequence(call: CallbackQuery, bot: Bot):
 
     await bot.send_message(
         chat_id=chat_id,
-        text="🎉 Теперь вы знаете, как пользоваться ботом. Вы можете: • добавить измерение • посмотреть отчёт • настроить цели Начнём?",
+        text="🎉 Теперь вы знаете, как пользоваться ботом. \n\nВы можете:\n • добавить измерение\n • посмотреть отчёт\n • настроить цели \n\nНачнём?",
         reply_markup=menu_kb()
     )
     
