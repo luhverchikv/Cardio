@@ -41,4 +41,5 @@ async def show_demo_sequence(call: CallbackQuery, bot: Bot):
         reply_markup=menu_kb()
     )
     await call.answer()
+    await call.message.delete()
 
