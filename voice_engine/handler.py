@@ -26,6 +26,20 @@ voice_logger = logger.bind(module="voice")
 @voice_router.message(F.voice)
 async def process_voice(message: Message):
     user_id = message.from_user.id
+    # 🔊 ПРОВЕРКА ДЛИТЕЛЬНОСТИ ГОЛОСОВОГО СООБЩЕНИЯ
+    if message.voice.duration > 10:  # ограничение по длине 10 секунд
+        await message.answer(
+            "⚠️ <b>Голосовое сообщение слишком длинное</b>\n"
+            "Пожалуйста, отправляйте сообщения не длиннее 10 секунд.\n"
+            "Это помогает системе работать стабильно и быстро обрабатывать ваши данные.",
+            parse_mode="HTML"
+        )
+        voice_logger.bind(
+            user_id=user_id,
+            event_type="voice_rejected"
+        ).warning(f"Voice message too long: {message.voice.duration}s")
+        return  # ❌ Прерываем обработку
+    
     # 👉 проверка последнего измерения
     last_time = await get_last_bp_timestamp(user_id)
     allowed, minutes_ago = check_bp_interval(last_time)
