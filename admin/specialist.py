@@ -143,4 +143,3 @@ async def broadcast_to_smart_user_handler(call: CallbackQuery, state: FSMContext
 @specialist_router.callback_query(F.data.startswith("view_chart:"))
 async def view_smart_user_chart(call: CallbackQuery, bot: Bot):
     await view_chart_handler(call, CONFIG, bot)
-    await view_analytics_handler(call, CONFIG, bot)
