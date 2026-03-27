@@ -29,6 +29,7 @@ from admin.base_handlers import (
 )
 from admin.entity_config import ENTITY_CONFIGS
 from mongo import users_collection
+from logic.analytics import generate_smart_user_analytics
 
 specialist_router = Router()
 specialist_router.message.filter(RoleFilter("specialist"))
