@@ -740,7 +740,11 @@ async def view_chart_handler(
         
 
 #======= Аналитика пользователя (новая функция) ========
-async def view_analytics_handler(     call: CallbackQuery,     config: EntityConfig,     bot: Bot     ):     """Просмотр аналитики пользователя (только аналитика, без графика)"""     entity_id = int(call.data.split(":")[2])     owner_id = call.from_user.id
+async def view_analytics_handler(
+    call: CallbackQuery,
+    config: EntityConfig,
+    bot: Bot
+    ):     """Просмотр аналитики пользователя (только аналитика, без графика)"""     entity_id = int(call.data.split(":")[2])     owner_id = call.from_user.id
     # 1️⃣ Получаем документ владельца для поиска alias
     owner_doc = await users_collection.find_one({"user_id": owner_id})
     if not owner_doc:
