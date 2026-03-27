@@ -689,3 +689,49 @@ async def view_chart_handler(
             f"❌ У пользователя <b>{alias}</b> нет данных за последние 30 дней",
             show_alert=True
         )
+        
+
+#======= Аналитика пользователя (новая функция) ========
+async def view_analytics_handler(     call: CallbackQuery,     config: EntityConfig,     bot: Bot     ):     """Просмотр аналитики пользователя (только аналитика, без графика)"""     entity_id = int(call.data.split(":")[2])     owner_id = call.from_user.id
+    # 1️⃣ Получаем документ владельца для поиска alias
+    owner_doc = await users_collection.find_one({"user_id": owner_id})
+    if not owner_doc:
+        await call.answer("❌ Владелец не найден", show_alert=True)
+        return
+
+    # 2️⃣ Ищем сущность в связях владельца и получаем alias
+    entity_data = None
+    for entity in owner_doc.get(config.connection_field, []):
+        if entity.get(config.id_field) == entity_id:
+            entity_data = entity
+            break
+    
+    if not entity_data:
+        await call.answer("❌ Сущность не найдена в ваших связях", show_alert=True)
+        return
+    
+    # 3️⃣ Расшифровываем alias
+    raw_alias = entity_data.get("alias", "Не указан")
+    try:
+        alias = decrypt_text(raw_alias)
+    except Exception:
+        alias = raw_alias
+    
+    # 4️⃣ Получаем аналитику
+    analytics = await generate_smart_user_analytics(entity_id)
+    
+    if analytics:
+        # Отправляем аналитику текстом
+        analytics_text = format_analytics_text(analytics, alias)
+        await bot.send_message(
+            chat_id=call.from_user.id,
+            text=analytics_text,
+            parse_mode="Markdown"
+        )
+        await call.answer("📊 Аналитика отправлена!", show_alert=False)
+    else:
+        await call.answer(
+            f"⚠️ У пользователя **{alias}** недостаточно данных для аналитики.\n"
+            f"Необходимо минимум 1 измерение за последние 30 дней.",
+            show_alert=True
+        )
