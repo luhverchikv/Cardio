@@ -12,7 +12,8 @@ db = client[config.db.name]
 users_collection = db["users"]
 
 # Константы для ролей и статусов
-VALID_ROLES = {"user", "admin", "specialist", "owner"}
+# mongo.py, строка ~40
+VALID_ROLES = {"user", "admin", "specialist", "owner", "smart_user"}
 REMINDER_STATUS_OFF = 0
 REMINDER_STATUS_MORNING = 1
 REMINDER_STATUS_EVENING = 2
