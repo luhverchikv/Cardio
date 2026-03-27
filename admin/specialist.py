@@ -91,7 +91,7 @@ async def show_smart_user_card(call: CallbackQuery):
         CONFIG,
         show_broadcast=True,  # ✅ Специалист может рассылать smart-пользователю
         show_chart=True,
-        show_analitics=True,      # ✅ Может смотреть график
+        show_analytics=True,      # ✅ Может смотреть график
         show_close=True       # ✅ Может закрыть
     )
 
