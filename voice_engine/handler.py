@@ -34,6 +34,7 @@ async def process_voice(message: Message):
             "Это помогает системе работать стабильно и быстро обрабатывать ваши данные.",
             parse_mode="HTML"
         )
+        await message.delete()
         voice_logger.bind(
             user_id=user_id,
             event_type="voice_rejected"
