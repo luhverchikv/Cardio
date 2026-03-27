@@ -49,14 +49,7 @@ class BroadcastStates(StatesGroup):
     waiting_for_broadcast_content = State()
 
 
-def format_analytics_text(analytics: dict, alias: str) -> str:     """     Форматирует аналитику в читаемый текст для отправки специалисту.
-    Args:
-        analytics: Словарь с данными аналитики от generate_smart_user_analytics
-        alias: Псевдоним пользователя
-    
-    Returns:
-        Отформатированный текст аналитики
-    """
+def format_analytics_text(analytics: dict, alias: str) -> str:
     text = f"📊 **Аналитика: {alias}**\n"
     text += f"📅 Период: {analytics.get('period', 'N/A')}\n"
     text += "━" * 20 + "\n\n"
