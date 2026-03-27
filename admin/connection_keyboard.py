@@ -115,22 +115,11 @@ def get_paginated_keyboard(
     return builder.as_markup()
 
 
-def get_entity_card_keyboard(
-    entity: dict,
-    entity_prefix: str = "entity",
-    id_field: str = "user_id",
-    show_broadcast: bool = False,  # ✅ Показывать кнопку рассылки
-    show_chart: bool = False,      # ✅ Показывать кнопку графика
-    show_close: bool = True        # ✅ Показывать кнопку закрытия
-):
-    """
-    Клавиатура для карточки сущности с гибкой настройкой кнопок.
-    Все кнопки в одном столбце (по одной в ряду).
-    """
-
-    entity_id = entity.get("user_id")
-    builder = InlineKeyboardBuilder()
-    
+def get_entity_card_keyboard(     entity: dict,     entity_prefix: str = "entity",     id_field: str = "user_id",     show_broadcast: bool = False, #     
+    show_chart: bool = False, # ✅ Показывать кнопку графика
+    show_analytics: bool = False, # ✅ Показывать кнопку аналитики
+    show_close: bool = True # ✅ Показывать кнопку закрытия
+    ):     """     Клавиатура для карточки сущности с гибкой настройкой кнопок.     Все кнопки в одном столбце (по одной в ряду).     """     entity_id = entity.get("user_id")     builder = InlineKeyboardBuilder()
     # ✅ Первый ряд: Редактировать
     builder.row(
         InlineKeyboardButton(
@@ -156,16 +145,29 @@ def get_entity_card_keyboard(
             )
         )
     
-    # ✅ Четвёртый ряд: График (если включен)
+    # ✅ Четвёртый ряд: График и Аналитика (если включены) - в одном ряду
+    chart_and_analytics_buttons = []
+    
     if show_chart:
-        builder.row(
+        chart_and_analytics_buttons.append(
             InlineKeyboardButton(
                 text="📊 График",
                 callback_data=f"view_chart:{entity_prefix}:{entity_id}"
             )
         )
     
-    # ✅ Пятый ряд: Закрыть (если включено)
+    if show_analytics:
+        chart_and_analytics_buttons.append(
+            InlineKeyboardButton(
+                text="📋 Аналитика",
+                callback_data=f"view_analytics:{entity_prefix}:{entity_id}"
+            )
+        )
+    
+    if chart_and_analytics_buttons:
+        builder.row(*chart_and_analytics_buttons)
+    
+    # ✅ Последний ряд: Закрыть (если включено)
     if show_close:
         builder.row(
             InlineKeyboardButton(
@@ -173,7 +175,7 @@ def get_entity_card_keyboard(
                 callback_data="close_callback"
             )
         )
-
+    
     return "", builder.as_markup()
     
 
