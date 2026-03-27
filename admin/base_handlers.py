@@ -332,6 +332,7 @@ async def show_entity_card(
     config: EntityConfig,
     show_broadcast: bool = False,  # ✅ Передаём параметры
     show_chart: bool = False,
+    show_analytics: bool = False,
     show_close: bool = True
 ):
     """Универсальная карточка сущности"""
@@ -387,6 +388,7 @@ async def show_entity_card(
         config.id_field,
         show_broadcast=show_broadcast,
         show_chart=show_chart,
+        show_analytics=show_analytics,
         show_close=show_close
     )
 
