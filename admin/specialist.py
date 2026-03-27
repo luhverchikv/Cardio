@@ -25,11 +25,12 @@ from admin.base_handlers import (
     process_broadcast_content,
     broadcast_to_entity_handler,
     view_chart_handler,
+    view_analytics_handler,
     close_callback_handler,
 )
 from admin.entity_config import ENTITY_CONFIGS
 from mongo import users_collection
-from logic.analytics import generate_smart_user_analytics
+
 
 specialist_router = Router()
 specialist_router.message.filter(RoleFilter("specialist"))
@@ -142,3 +143,4 @@ async def broadcast_to_smart_user_handler(call: CallbackQuery, state: FSMContext
 @specialist_router.callback_query(F.data.startswith("view_chart:"))
 async def view_smart_user_chart(call: CallbackQuery, bot: Bot):
     await view_chart_handler(call, CONFIG, bot)
+    await view_analytics_handler(call, CONFIG, bot)
