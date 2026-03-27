@@ -21,6 +21,11 @@ MULTIPLIERS = {
 def words_to_number(text: str) -> int | None:
     """Преобразует числительные в число."""
     words = text.lower().split()
+    
+    # Защита от пустого списка
+    if not words:
+        return None
+        
     total = 0
     current = 0
 
