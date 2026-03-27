@@ -49,6 +49,61 @@ class BroadcastStates(StatesGroup):
     waiting_for_broadcast_content = State()
 
 
+def format_analytics_text(analytics: dict, alias: str) -> str:     """     Форматирует аналитику в читаемый текст для отправки специалисту.
+    Args:
+        analytics: Словарь с данными аналитики от generate_smart_user_analytics
+        alias: Псевдоним пользователя
+    
+    Returns:
+        Отформатированный текст аналитики
+    """
+    text = f"📊 **Аналитика: {alias}**\n"
+    text += f"📅 Период: {analytics.get('period', 'N/A')}\n"
+    text += "━" * 20 + "\n\n"
+    
+    # Основные метрики
+    text += "**📈 Средние значения:**\n"
+    if analytics.get('avg_systolic'):
+        text += f"  • Систолическое (верхнее): {analytics['avg_systolic']} мм рт.ст.\n"
+    if analytics.get('avg_diastolic'):
+        text += f"  • Диастолическое (нижнее): {analytics['avg_diastolic']} мм рт.ст.\n"
+    if analytics.get('avg_pulse'):
+        text += f"  • Пульс: {analytics['avg_pulse']} уд/мин\n"
+    
+    text += "\n"
+    
+    # Целевые показатели
+    targets = analytics.get('targets', {})
+    if targets:
+        text += "**🎯 Целевые значения:**\n"
+        text += f"  • САД: {targets.get('systolic', 'не задано')} мм рт.ст.\n"
+        text += f"  • ДАД: {targets.get('diastolic', 'не задано')} мм рт.ст.\n"
+        text += "\n"
+    
+    # Приверженность и контроль
+    text += "**📋 Приверженность лечению:**\n"
+    adherence = analytics.get('adherence', 0)
+    text += f"  • Измерения: {adherence:.0f}% дней\n"
+    dtir = analytics.get('dtir', 0)
+    text += f"  • Дни в целевом диапазоне: {dtir:.0f}%\n"
+    text += f"  • Всего записей: {analytics.get('records_count', 0)}\n"
+    
+    text += "\n"
+    
+    # Тренд
+    trend = analytics.get('trend', '➡️ Стабильно')
+    text += f"**{trend}** Тренд артериального давления\n"
+    
+    # Предупреждения
+    alerts = analytics.get('alerts', [])
+    if alerts:
+        text += "\n**⚠️ Рекомендации:**\n"
+        for alert in alerts:
+            text += f"  {alert}\n"
+    
+    return text
+
+
 # ========== ОБЩИЕ ХЕНДЛЕРЫ ==========
 
 async def list_entities_handler(
