@@ -13,7 +13,7 @@ from admin.broadcast import send_broadcast_message
 from mongo import users_collection, update_user_roles_and_connections, update_entity_alias, delete_entity_from_db
 from logic.report.blood_pressure_chart import generate_blood_pressure_chart
 from utils.encryption import decrypt_text
-
+from logic.analytics import generate_smart_user_analytics
 
 class BaseEntityStates(StatesGroup):
     """Базовые состояния (для общих функций)"""
