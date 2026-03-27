@@ -115,11 +115,17 @@ def get_paginated_keyboard(
     return builder.as_markup()
 
 
-def get_entity_card_keyboard(     entity: dict,     entity_prefix: str = "entity",     id_field: str = "user_id",     show_broadcast: bool = False, #     
-    show_chart: bool = False, # ✅ Показывать кнопку графика
-    show_analytics: bool = False, # ✅ Показывать кнопку аналитики
-    show_close: bool = True # ✅ Показывать кнопку закрытия
-    ):     """     Клавиатура для карточки сущности с гибкой настройкой кнопок.     Все кнопки в одном столбце (по одной в ряду).     """     entity_id = entity.get("user_id")     builder = InlineKeyboardBuilder()
+def get_entity_card_keyboard(
+    entity: dict,
+    entity_prefix: str = "entity",
+    id_field: str = "user_id",
+    show_broadcast: bool = False,
+    show_chart: bool = False,
+    show_analytics: bool = False,
+    show_close: bool = True
+    ):
+    entity_id = entity.get("user_id")
+    builder = InlineKeyboardBuilder()
     # ✅ Первый ряд: Редактировать
     builder.row(
         InlineKeyboardButton(
