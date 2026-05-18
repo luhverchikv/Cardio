@@ -1,3 +1,5 @@
+# utilsl/bp_reminders.py
+
 from datetime import datetime, timedelta
 from loguru import logger
 
@@ -5,7 +7,6 @@ from mongo import (
     get_users_with_reminders,
     get_last_bp_timestamp
 )
-#from logic.reminders.keyboard import edit_reminders_keyboard
 
 
 async def run_bp_reminders(bot, *allowed_states: int):
